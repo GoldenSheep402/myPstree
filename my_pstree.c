@@ -36,7 +36,6 @@ int main(int argc, char *argv[])
         assert(!argv[argc]);
         read_pid("/proc", root_node);
 
-        printf(argv[1]);
         printf("Print All Process\n");
         char prefix[256] = "";
         traverse_process_tree(dummy_head->child, prefix);
