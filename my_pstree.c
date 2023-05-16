@@ -19,7 +19,7 @@ void read_pid(const char *pid_dir, struct ProcessNode *pid_node);
 void add_child_process(struct ProcessNode *node, struct ProcessNode *child, int ppid);
 struct ProcessNode *new_node();
 void print_indent(int level, int is_last_sibling);
-void traverse_process_tree(struct ProcessNode *node, int level);
+void traverse_process_tree(struct ProcessNode *node, char *prefix);
 
 int main(int argc, char *argv[])
 {
@@ -38,7 +38,8 @@ int main(int argc, char *argv[])
 
         printf(argv[1]);
         printf("Print All Process\n");
-        traverse_process_tree(dummy_head->child, 0);
+        char prefix[256] = "";
+        traverse_process_tree(dummy_head->child, prefix);
     }
     else
     {
@@ -183,19 +184,42 @@ void print_indent(int level, int is_last_sibling)
 }
 
 // DFS
-void traverse_process_tree(struct ProcessNode *node, int level)
+void traverse_process_tree(struct ProcessNode *node, char *prefix)
 {
     if (node == NULL)
     {
         return;
     }
 
+    // Print prefix
+    printf("%s", prefix);
+
+    // judge is last sibling
     int is_last_sibling = (node->sibling == NULL);
+    if (is_last_sibling)
+    {
+        printf("└─PID: %d, Name: [%s]\n", node->pid, node->name);
+    }
+    else
+    {
+        printf("├─PID: %d, Name: [%s]\n", node->pid, node->name);
+    }
 
-    print_indent(level, is_last_sibling);
-    printf("PID: %d, Name: %s\n", node->pid, node->name);
+    // Create new prefix for children
+    size_t prefix_length = 255;
+    char *child_prefix = malloc(255);
+    strcpy(child_prefix, prefix);
+    if (is_last_sibling)
+    {
+        strcat(child_prefix, "    "); // last sibling
+    }
+    else
+    {
+        strcat(child_prefix, "│  "); // not last sibling
+    }
 
-    traverse_process_tree(node->child, level + 1);
+    traverse_process_tree(node->child, child_prefix);
+    free(child_prefix); // free the allocated memory!
 
-    traverse_process_tree(node->sibling, level);
+    traverse_process_tree(node->sibling, prefix);
 }
